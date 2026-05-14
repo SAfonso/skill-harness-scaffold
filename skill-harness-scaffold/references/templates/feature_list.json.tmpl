@@ -1,0 +1,53 @@
+{
+  "_project": "{{PROJECT_NAME}}",
+  "_rules": {
+    "generales": [
+      "Solo un item puede estar en 'in_progress' a la vez.",
+      "Una tarea con depends_on no puede pasar a 'in_progress' hasta que todas sus dependencias estén en 'done'.",
+      "Solo el reviewer puede marcar una tarea como 'done'. El leader nunca lo hace directamente."
+    ],
+    "priority": [
+      "El leader ordena la ejecución de tareas 'pending' por priority de mayor a menor: high > medium > low.",
+      "Si dos tareas tienen la misma priority, el leader respeta el orden del array.",
+      "El campo priority puede ser modificado en cualquier momento por el usuario o el leader si las circunstancias del proyecto cambian."
+    ],
+    "modificacion_en_vuelo": {
+      "añadir_dependencias": [
+        "El implementer puede añadir nuevos ids al campo depends_on de una tarea mientras está en 'in_progress' si descubre que depende de algo no previsto.",
+        "Cuando esto ocurra debe: cambiar el status de la tarea a 'pending', documentar el motivo en progress/impl_<feature>.md, y devolver el control al leader.",
+        "El leader decide qué tarea priorizar a continuación."
+      ],
+      "dividir_una_tarea": [
+        "El implementer puede proponer dividir una tarea en varias si descubre que es más compleja de lo previsto.",
+        "No puede dividirla solo: debe devolver el control al leader con la propuesta documentada en progress/impl_<feature>.md.",
+        "El leader consulta al usuario antes de proceder."
+      ],
+      "añadir_tareas_nuevas": [
+        "Cualquier agente puede proponer nuevas features añadiéndolas al array con status 'pending'.",
+        "Ningún agente puede moverlas a 'in_progress' sin que el leader haya informado al usuario primero."
+      ]
+    }
+  },
+  "features": [
+    {
+      "id": "feat-001",
+      "title": "Ejemplo: tarea base",
+      "description": "Descripción exacta de qué debe hacer esta feature. Sin ambigüedad: el reviewer verificará que el resultado hace esto y solo esto.",
+      "status": "done",
+      "priority": "high",
+      "depends_on": [],
+      "created_at": "YYYY-MM-DD",
+      "completed_at": "YYYY-MM-DD"
+    },
+    {
+      "id": "feat-002",
+      "title": "Ejemplo: tarea con dependencia",
+      "description": "Descripción exacta de qué debe hacer esta feature. No puede iniciarse hasta que feat-001 esté en 'done'.",
+      "status": "pending",
+      "priority": "medium",
+      "depends_on": ["feat-001"],
+      "created_at": "YYYY-MM-DD",
+      "completed_at": null
+    }
+  ]
+}

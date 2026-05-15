@@ -1,0 +1,63 @@
+{
+  "_project": "todo-cli",
+  "_rules": {
+    "generales": [
+      "Solo un item puede estar en 'in_progress' a la vez.",
+      "Una tarea con depends_on no puede pasar a 'in_progress' hasta que todas sus dependencias estén en 'done'.",
+      "Solo el reviewer puede marcar una tarea como 'done'. El leader nunca lo hace directamente."
+    ],
+    "priority": [
+      "El leader ordena la ejecución de tareas 'pending' por priority de mayor a menor: high > medium > low.",
+      "Si dos tareas tienen la misma priority, el leader respeta el orden del array.",
+      "El campo priority puede ser modificado en cualquier momento por el usuario o el leader si las circunstancias del proyecto cambian."
+    ],
+    "modificacion_en_vuelo": {
+      "añadir_dependencias": [
+        "El implementer puede añadir nuevos ids al campo depends_on de una tarea mientras está en 'in_progress' si descubre que depende de algo no previsto.",
+        "Cuando esto ocurra debe: cambiar el status de la tarea a 'pending', documentar el motivo en progress/impl_<feature>.md, y devolver el control al leader.",
+        "El leader decide qué tarea priorizar a continuación."
+      ],
+      "dividir_una_tarea": [
+        "El implementer puede proponer dividir una tarea en varias si descubre que es más compleja de lo previsto.",
+        "No puede dividirla solo: debe devolver el control al leader con la propuesta documentada en progress/impl_<feature>.md.",
+        "El leader consulta al usuario antes de proceder."
+      ],
+      "añadir_tareas_nuevas": [
+        "Cualquier agente puede proponer nuevas features añadiéndolas al array con status 'pending'.",
+        "Ningún agente puede moverlas a 'in_progress' sin que el leader haya informado al usuario primero."
+      ]
+    }
+  },
+  "features": [
+    {
+      "id": "feat-001",
+      "title": "Añadir tarea",
+      "description": "El usuario puede ejecutar `python src/main.py add \"<texto>\"` para añadir una tarea nueva. La tarea se guarda en tasks.json con un id autoincremental, el texto proporcionado y status 'pending'. El comando imprime 'Tarea añadida: [<id>] <texto>'.",
+      "status": "pending",
+      "priority": "high",
+      "depends_on": [],
+      "created_at": "2026-05-15",
+      "completed_at": null
+    },
+    {
+      "id": "feat-002",
+      "title": "Listar tareas",
+      "description": "El usuario puede ejecutar `python src/main.py list` para ver todas las tareas guardadas en tasks.json. El comando imprime cada tarea en formato `[<id>] [<status>] <texto>`, una por línea. Si no hay tareas, imprime 'No hay tareas.'.",
+      "status": "pending",
+      "priority": "high",
+      "depends_on": [],
+      "created_at": "2026-05-15",
+      "completed_at": null
+    },
+    {
+      "id": "feat-003",
+      "title": "Marcar tarea como completada",
+      "description": "El usuario puede ejecutar `python src/main.py done <id>` para marcar una tarea existente como completada. El comando actualiza el status de la tarea a 'done' en tasks.json e imprime 'Tarea completada: [<id>] <texto>'. Si el id no existe, imprime 'Error: tarea <id> no encontrada.' y sale con código 1.",
+      "status": "pending",
+      "priority": "medium",
+      "depends_on": ["feat-001"],
+      "created_at": "2026-05-15",
+      "completed_at": null
+    }
+  ]
+}

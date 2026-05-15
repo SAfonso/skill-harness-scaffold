@@ -1,0 +1,78 @@
+{
+  "_project": "public-data-pipeline",
+  "_rules": {
+    "generales": [
+      "Solo un item puede estar en 'in_progress' a la vez.",
+      "Una tarea con depends_on no puede pasar a 'in_progress' hasta que todas sus dependencias estén en 'done'.",
+      "Solo el reviewer puede marcar una tarea como 'done'. El leader nunca lo hace directamente."
+    ],
+    "priority": [
+      "El leader ordena la ejecución de tareas 'pending' por priority de mayor a menor: high > medium > low.",
+      "Si dos tareas tienen la misma priority, el leader respeta el orden del array.",
+      "El campo priority puede ser modificado en cualquier momento por el usuario o el leader si las circunstancias del proyecto cambian."
+    ],
+    "pipeline": [
+      "Las fases del pipeline deben implementarse en orden: downloader → parser → storage → exporter.",
+      "Nunca iniciar una fase sin que la anterior esté en 'done' — las dependencias reflejan este orden.",
+      "Cada fase debe ser idempotente: ejecutarla dos veces produce el mismo resultado que ejecutarla una vez."
+    ],
+    "modificacion_en_vuelo": {
+      "añadir_dependencias": [
+        "El implementer puede añadir nuevos ids al campo depends_on de una tarea mientras está en 'in_progress' si descubre que depende de algo no previsto.",
+        "Cuando esto ocurra debe: cambiar el status de la tarea a 'pending', documentar el motivo en progress/impl_<feature>.md, y devolver el control al leader.",
+        "El leader decide qué tarea priorizar a continuación."
+      ],
+      "dividir_una_tarea": [
+        "El implementer puede proponer dividir una tarea en varias si descubre que es más compleja de lo previsto.",
+        "No puede dividirla solo: debe devolver el control al leader con la propuesta documentada en progress/impl_<feature>.md.",
+        "El leader consulta al usuario antes de proceder."
+      ],
+      "añadir_tareas_nuevas": [
+        "Cualquier agente puede proponer nuevas features añadiéndolas al array con status 'pending'.",
+        "Ningún agente puede moverlas a 'in_progress' sin que el leader haya informado al usuario primero."
+      ]
+    }
+  },
+  "features": [
+    {
+      "id": "feat-001",
+      "title": "Downloader — descargar datos de datos.gob.es",
+      "description": "Implementar src/downloader.py con una función download() que descargue el dataset público de municipios de España desde datos.gob.es y lo guarde en data/raw/municipios.csv. Si data/raw/ no existe, crearlo. Si el fichero ya existe, sobreescribirlo (idempotente). Si la descarga falla (timeout, HTTP error), lanzar una excepción con el código de error HTTP y no dejar ficheros parciales. El módulo debe ser ejecutable directamente: `python src/downloader.py`.",
+      "status": "pending",
+      "priority": "high",
+      "depends_on": [],
+      "created_at": "2026-05-15",
+      "completed_at": null
+    },
+    {
+      "id": "feat-002",
+      "title": "Parser — limpiar y normalizar los datos descargados",
+      "description": "Implementar src/parser.py con una función parse(input_path, output_path) que lea data/raw/municipios.csv, limpie y normalice los datos y guarde el resultado en data/clean/municipios.csv. Limpieza requerida: eliminar filas con campos obligatorios vacíos (codigo_ine, nombre, provincia), normalizar nombres a title case, eliminar espacios extra. El schema de salida es: codigo_ine (str, 5 dígitos con cero a la izquierda), nombre (str), provincia (str), comunidad_autonoma (str). Documentar en progress/impl_feat-002.md el recuento de registros descartados y el motivo.",
+      "status": "pending",
+      "priority": "high",
+      "depends_on": ["feat-001"],
+      "created_at": "2026-05-15",
+      "completed_at": null
+    },
+    {
+      "id": "feat-003",
+      "title": "Storage — persistir datos limpios en SQLite",
+      "description": "Implementar src/storage.py con una función load(input_path, db_path) que lea data/clean/municipios.csv y lo cargue en una tabla 'municipios' de data/pipeline.db (SQLite). Schema de la tabla: codigo_ine TEXT PRIMARY KEY, nombre TEXT NOT NULL, provincia TEXT NOT NULL, comunidad_autonoma TEXT NOT NULL. La operación debe ser idempotente: si la tabla existe, vaciarla antes de insertar (truncate + insert). Si data/pipeline.db no existe, crearlo automáticamente.",
+      "status": "pending",
+      "priority": "medium",
+      "depends_on": ["feat-002"],
+      "created_at": "2026-05-15",
+      "completed_at": null
+    },
+    {
+      "id": "feat-004",
+      "title": "Exporter — exportar datos a CSV y JSON",
+      "description": "Implementar src/exporter.py con una función export(db_path, output_dir) que lea la tabla 'municipios' de data/pipeline.db y genere dos ficheros en data/export/: municipios.csv (con cabecera, codificación UTF-8) y municipios.json (array de objetos con los mismos campos). Si data/export/ no existe, crearlo. La operación es idempotente: sobreescribir si los ficheros ya existen. El número de registros exportados debe coincidir con el número de filas en la tabla.",
+      "status": "pending",
+      "priority": "low",
+      "depends_on": ["feat-003"],
+      "created_at": "2026-05-15",
+      "completed_at": null
+    }
+  ]
+}

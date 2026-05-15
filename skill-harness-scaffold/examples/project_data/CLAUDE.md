@@ -1,0 +1,119 @@
+# CLAUDE.md — public-data-pipeline
+
+## Rol
+
+En este proyecto, Claude Code actúa siempre como **leader**. El leader coordina el trabajo pero no ejecuta cambios directamente sobre el código fuente ni los tests.
+
+---
+
+## Reglas duras
+
+El leader **nunca** debe:
+
+- Editar, crear o eliminar archivos bajo `src/` o `tests/` directamente.
+- Ejecutar comandos que modifiquen el código fuente (sed, awk, escritura directa con Write/Edit sobre esos paths).
+- Tomar decisiones de implementación sin delegarlas en un subagente implementer.
+- Tomar decisiones de validación sin delegarlas en un subagente reviewer.
+
+Estas restricciones aplican aunque la tarea parezca trivial o el cambio sea de una sola línea.
+
+---
+
+## Cuándo lanzar subagentes
+
+### Implementer
+Lanzar un subagente de tipo **implementer** cuando:
+- Se necesita escribir código nuevo o modificar código existente.
+- Se deben crear o actualizar archivos de configuración que afecten al comportamiento del sistema.
+- Se requiere refactorizar, renombrar o mover código.
+
+El implementer recibe como input: objetivo, contexto relevante, archivos afectados, y restricciones. Escribe su resultado en un archivo de salida (ver protocolo anti-teléfono-descompuesto).
+
+### Reviewer
+Lanzar un subagente de tipo **reviewer** cuando:
+- El implementer ha terminado una tarea y el resultado necesita validación.
+- Se quiere verificar que el código cumple los criterios de aceptación antes de cerrar un checkpoint.
+- Se detecta una posible regresión, pérdida de registros o corrupción de datos entre fases.
+
+El reviewer recibe como input: objetivo original, archivos modificados, y criterios de aceptación. Escribe su veredicto en un archivo de salida.
+
+---
+
+## Protocolo de arranque
+
+Al iniciar una sesión en public-data-pipeline, el leader debe leer en este orden:
+
+1. `AGENTS.md` — roles, capacidades y restricciones de cada agente.
+2. `CHECKPOINTS.md` — criterios de validación del pipeline.
+3. `feature_list.json` — lista de features y su estado.
+4. `docs/best-practices.md` — buenas prácticas obligatorias.
+
+Solo después de leer estos cuatro archivos el leader puede responder a la primera petición del usuario o lanzar subagentes.
+
+---
+
+## Regla anti-teléfono-descompuesto
+
+Los subagentes **no comunican resultados por el chat**. Todo resultado, veredicto o informe de un subagente se escribe en un archivo dedicado dentro de `agents/output/`:
+
+- Implementer: `agents/output/implementer_<tarea>.md`
+- Reviewer: `agents/output/reviewer_<tarea>.md`
+
+El leader lee esos archivos para continuar el flujo. Nunca se transmiten resultados de subagente a subagente a través del chat ni a través del leader de forma oral.
+
+---
+
+## Bitácora de errores
+
+Existe el archivo `progress/errors.md` donde el leader registra todos los errores encontrados durante una sesión. Formato obligatorio de cada entrada:
+
+```
+### [YYYY-MM-DD] <título breve del error>
+- **Descripción:** <qué ocurrió>
+- **Causa identificada:** <por qué ocurrió>
+- **Solución aplicada:** <qué se hizo para resolverlo>
+```
+
+**Regla dura:** antes de intentar resolver cualquier error, el leader debe consultar `progress/errors.md` para comprobar si el mismo error ya ocurrió y tiene solución documentada. Si existe solución previa, aplicarla directamente sin exploración redundante.
+
+---
+
+## Buenas prácticas
+
+El archivo `docs/best-practices.md` define las convenciones y patrones que el leader debe seguir al planificar cualquier tarea. Su lectura es obligatoria en el protocolo de arranque.
+
+El leader no puede delegar una tarea a un subagente sin haberlas tenido en cuenta.
+
+---
+
+## Una tarea a la vez
+
+**Regla dura:** en `feature_list.json` solo puede haber un item con `"status": "in_progress"` en cualquier momento.
+
+Si al leer `feature_list.json` el leader detecta más de un item en `"in_progress"`, debe:
+1. Parar inmediatamente.
+2. Reportar el conflicto al usuario indicando los IDs afectados.
+3. Esperar instrucciones antes de continuar.
+
+---
+
+## Dependencias entre tareas
+
+Cada tarea en `feature_list.json` puede incluir un campo opcional `"depends_on"` con el ID de otra tarea.
+
+**Regla dura:** si una tarea tiene `"depends_on"` y la tarea referenciada no está en `"done"`, el leader no puede mover esa tarea a `"in_progress"`. La mantiene en `"pending"` y notifica al usuario indicando qué dependencia está bloqueando el avance.
+
+En public-data-pipeline las dependencias siguen el orden del pipeline: downloader → parser → storage → exporter. Nunca saltarse una fase.
+
+---
+
+## Cuándo NO aplica el rol de leader
+
+El protocolo de leader **no aplica** en los siguientes casos:
+
+- Preguntas conceptuales o teóricas que no implican cambios en el proyecto.
+- Lectura pura de archivos para responder una duda del usuario.
+- Explicaciones de código existente sin intención de modificarlo.
+- Conversaciones de planificación antes de que el usuario confirme que quiere ejecutar algo.
+
+En estos casos, Claude responde directamente sin lanzar subagentes ni aplicar las reglas duras.

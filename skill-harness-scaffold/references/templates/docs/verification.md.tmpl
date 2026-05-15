@@ -1,0 +1,62 @@
+# Verificación — {{PROJECT_NAME}}
+
+Guía de verificación para el implementer y el reviewer. Define cómo demostrar que una feature funciona correctamente y cómo documentar ese resultado.
+
+---
+
+## Cómo ejecutar los tests
+
+<!-- Sustituir con el comando real del proyecto al inicializar el harness. -->
+
+```bash
+# Todos los tests
+<comando de test>
+
+# Tests de un módulo específico
+<comando de test> <módulo>
+
+# Tests con output detallado
+<comando de test> --verbose
+```
+
+El implementer ejecuta los tests al terminar la implementación y antes de escribir `progress/impl_<feature>.md`. El reviewer los ejecuta de forma independiente durante la validación.
+
+---
+
+## Qué constituye un test válido
+
+Un test es válido si cumple todas estas condiciones:
+
+- **Prueba comportamiento, no implementación.** El test verifica qué hace el código, no cómo lo hace internamente. Si se cambia la implementación sin cambiar el comportamiento, el test debe seguir pasando.
+- **Es determinista.** El mismo test produce el mismo resultado en cada ejecución, en cualquier entorno.
+- **Es independiente.** No depende del orden de ejecución ni del estado dejado por otro test.
+- **Tiene un solo motivo de fallo.** Si un test puede fallar por dos razones distintas, debe dividirse en dos tests.
+- **El nombre describe qué falla si el test falla.** No `test_function_1` sino `test_returns_error_when_input_is_empty`.
+
+Un test que siempre pasa sin verificar nada (falso positivo) es peor que no tener test.
+
+---
+
+## Cómo documentar el resultado de verificación en progress/impl_<feature>.md
+
+Al terminar la implementación, el implementer añade una sección de verificación al final de `progress/impl_<feature>.md` con este formato:
+
+```
+## Verificación
+
+**Comando ejecutado:**
+<comando exacto que se ejecutó>
+
+**Output:**
+<output completo, sin recortar — si es muy largo, incluir las líneas relevantes y resumir el resto>
+
+**Resultado:** PASS | FAIL
+
+**Tests añadidos:**
+- <nombre del test> — <qué verifica>
+
+**Casos no cubiertos por los tests:**
+- <qué no se pudo cubrir y por qué>
+```
+
+Si el resultado es `FAIL`, el implementer no marca la sección como finalizada — documenta qué falló y devuelve el control al leader antes de intentar corregirlo.

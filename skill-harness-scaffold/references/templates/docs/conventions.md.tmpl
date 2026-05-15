@@ -1,0 +1,79 @@
+# Convenciones — {{PROJECT_NAME}}
+
+Cualquier agente debe consultar este fichero antes de crear o modificar ficheros en el proyecto. Las convenciones aquí definidas son obligatorias y aplican a todo el código nuevo o modificado.
+
+---
+
+## Naming
+
+<!-- Definir las convenciones de nomenclatura del proyecto. Ejemplos: -->
+
+- **Variables y funciones:** `camelCase`
+- **Clases y tipos:** `PascalCase`
+- **Constantes:** `UPPER_SNAKE_CASE`
+- **Ficheros:** `kebab-case`
+- **Directorios:** `kebab-case`
+
+_Ajustar según el lenguaje principal del proyecto._
+
+---
+
+## Estructura de ficheros
+
+<!-- Describir dónde va cada tipo de fichero. -->
+
+```
+src/          código fuente
+tests/        tests unitarios e integración
+docs/         documentación del proyecto
+progress/     estado y bitácoras del harness
+agents/       definiciones de agentes y outputs
+```
+
+---
+
+## Estilo de código
+
+- Máximo **N** caracteres por línea. _(definir N según el proyecto)_
+- Indentación: **espacios / tabs** de **N** caracteres. _(elegir uno)_
+- Sin trailing whitespace.
+- Fichero termina en newline.
+- No dejar código comentado sin motivo explícito.
+
+---
+
+## Commits — Conventional Commits
+
+Formato obligatorio:
+
+```
+<tipo>(<scope>): <descripción en imperativo, minúsculas>
+```
+
+Tipos válidos:
+
+| Tipo     | Cuándo usarlo |
+|----------|---------------|
+| `feat`   | Nueva funcionalidad |
+| `fix`    | Corrección de bug |
+| `docs`   | Solo documentación |
+| `test`   | Añadir o corregir tests |
+| `refactor` | Refactor sin cambio de comportamiento |
+| `chore`  | Tareas de mantenimiento (deps, config) |
+
+Ejemplos:
+
+```
+feat(auth): add token refresh on expiry
+fix(parser): handle empty input without panic
+docs(readme): update installation steps
+```
+
+---
+
+## Idioma
+
+- **Código fuente** (variables, funciones, clases, comentarios inline): inglés.
+- **Documentación** (`docs/`, `progress/`, ficheros `.md`): español.
+- **Mensajes de commit:** inglés.
+- **Mensajes de error visibles al usuario final:** según el público objetivo del proyecto _(definir)_.

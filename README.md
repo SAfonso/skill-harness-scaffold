@@ -132,3 +132,16 @@ A local Python data engineering pipeline that downloads public data from datos.g
 ## Contributing
 
 PRs and issues welcome — especially new examples, additional agent types, or language-specific convention templates.
+
+---
+
+## Roadmap
+
+### v2 — Tools and Hooks
+
+- **`references/templates/.claude/settings.json.tmpl`** — pre-configured tool permissions for the harness. Read, write, grep, ls, and basic bash run without confirmation. Destructive operations (git push, rm, anything irreversible) always require explicit approval.
+- **`references/templates/.claude/hooks/post-commit.sh.tmpl`** — a post-commit hook that runs after each user-confirmed commit. Clears `progress/current.md` and appends the session summary to `progress/history.md`, keeping the session log in sync with git history without manual steps.
+
+### v3 — Domain-specific scaffolding
+
+Currently the Skill generates the same base structure for every project. In v3, the user will choose a domain (data, web, cli, library, etc.) at generation time and the Skill will adapt the content of the generated files accordingly — domain-specific conventions, validation criteria, architecture stubs, and verification guides instead of generic placeholders.
